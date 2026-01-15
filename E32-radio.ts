@@ -298,7 +298,7 @@ namespace pxtlora {
      */
     //% block
     //% weight=34
-    export function e32parametere() {
+    export function e32parameters() {
         let rcvData: Buffer = null
         rcvData = Buffer.create(6)
 
