@@ -323,7 +323,7 @@ namespace pxtlora {
 
 
     /**
-     * e32restarte
+     * e32restart
      */
     //% block
     //% weight=34
