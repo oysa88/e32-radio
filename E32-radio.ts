@@ -1,47 +1,45 @@
-// enum for UART‑baud
 const enum UartBaud {
-    //% block="1,2 K"
+    //% block="1.2K"
     BaudRate1200 = "0",
-    //% block="2,4 K"
+    //% block="2.4K"
     BaudRate2400 = "1",
-    //% block="4,8 K"
+    //% block="4.8K"
     BaudRate4800 = "2",
-    //% block="9,6 K"
+    //% block="9.6K"
     BaudRate9600 = "3",
-    //% block="19,2 K"
+    //% block="19.2K"
     BaudRate19200 = "4",
-    //% block="38,4 K"
+    //% block="38.4K"
     BaudRate38400 = "5",
-    //% block="57,6 K"
+    //% block="57.6K"
     BaudRate57600 = "6",
-    //% block="115,2 K"
+    //% block="115.2K"
     BaudRate115200 = "7"
 }
 
-// enum for luft (air) baud
 const enum AirBaud {
-    //% block="0,3 K"
+    //% block="0.3K"
     BaudRate300 = "0",
-    //% block="1,2 K"
+    //% block="1.2K"
     BaudRate1200 = "1",
-    //% block="2,4 K"
+    //% block="2.4K"
     BaudRate2400 = "2",
-    //% block="4,8 K"
+    //% block="4.8K"
     BaudRate4800 = "3",
-    //% block="9,6 K"
+    //% block="9.6K"
     BaudRate9600 = "4",
-    //% block="19,2 K"
+    //% block="19.2K"
     BaudRate19200 = "5"
 }
 
 /**
- * E32LORA blokker
+ * pxt-lora block
  */
 //% weight=100 color=#00cc00 icon="\uf012" block="E32LORA"
-namespace E32LORA {
+namespace pxtlora {
 
     /**
-     * Klasse for pinnene på E32-modulen
+     * E32 Pin Config class
      */
     export class E32PinConfig {
         m0: DigitalPin;
@@ -54,26 +52,30 @@ namespace E32LORA {
     }
 
     let e32Pins = new E32PinConfig();
-    let initialized = false;
 
+    let initialized = false;
     function init() {
         if (initialized) return;
         initialized = true;
     }
 
-    let onReceivedStringHandler: (mottatt: string) => void;
+    let onReceivedStringHandler: (receivedString: string) => void;
 
     serial.onDataReceived(serial.delimiters(Delimiters.NewLine), function () {
-        if (!e32Pins.config) {
+        if (e32Pins.config == false) {
             let str: string = serial.readString()
             onReceivedStringHandler(str)
         }
     })
 
+
     // ==========================================================================
-    // Interne funksjoner
+    // Internal Functions
     // ==========================================================================
 
+    /**
+     * e32auxTimeout
+     */
     function e32auxTimeout(value: number) {
         basic.pause(value)
         if (auxPin() == 0) {
@@ -82,7 +84,14 @@ namespace E32LORA {
         }
     }
 
+
+    /**
+     * decToHexString
+     *
+     * https://stackoverflow.com/questions/50967455/from-decimal-to-hexadecimal-without-tostring
+     */
     function decToHexString(int: number, base: number): string {
+        //        let letters = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
         let letters = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"];
         let returnVal = "";
         if (base > 1 && base < 37) {
@@ -92,152 +101,232 @@ namespace E32LORA {
                 returnVal = letters[rest] + returnVal;
             }
         }
-        if (returnVal == "") returnVal = "0"
-        if (returnVal.length == 1) returnVal = "0" + returnVal
+        if (returnVal == "") {
+            returnVal = "0"
+        }
+        if (returnVal.length == 1) {
+            returnVal = "0" + returnVal
+        }
         return returnVal;
     }
 
+    /**
+     * decToBcd
+    */
     function decToBcd(value: number): number {
         return (Math.floor(value / 10) << 4) + (value % 10)
     }
 
+    /**
+     * bcdToDec
+    */
     function bcdToDec(value: number): number {
         return Math.floor(value / 16) * 10 + (value % 16)
     }
 
+    /**
+     * errorHalt
+    */
     function errorHalt(errno: number) {
         while (true) {
-            basic.showIcon(IconNames.Sad)
+            basic.showIcon(IconNames.Sad);
             basic.pause(2000)
-            basic.showString("E32:" + convertToText(errno))
+            basic.showString("E32:" + convertToText(errno));
         }
     }
 
+    /**
+     * buffer2string
+    */
     function buffer2string(buf: Buffer): string {
-        let str = ""
+        let str: string = "";
         let recArray = buf.toArray(NumberFormat.UInt8LE)
         for (let idx = 0; idx <= recArray.length - 1; idx++) {
-            str += decToHexString(recArray[idx], 16) + " "
+            str = str + (decToHexString(recArray[idx], 16) + " ")
         }
-        return str
+        return str;
     }
 
+
     // ==========================================================================
-    // Eksporterte funksjoner
+    // Export Functions.
     // ==========================================================================
 
+    /**
+     * e32Init
+     */
     //% weight=44
-    //% block="E32LORA pin config: | M0: %m0 M1: %m1 AUX: %aux | TX: %tx RX: %rx BAUD: %baud KONFIGURASJONSMODUS: %ConfigMode"
-    //% m0.defl=DigitalPin.P16 m1.defl=DigitalPin.P12 aux.defl=DigitalPin.P1 tx.defl=SerialPin.P2 rx.defl=SerialPin.P8 baud.defl=BaudRate.BaudRate9600 ConfigMode.defl=false
+    //% block="E32 LoRa pin konfigurering:|M0: %m0 M1: %m1 AUX: %aux|TX: %tx RX: %rx BAUD: %baud Konfigureringsmodus: %ConfigMode"
+    //% m0.defl=DigitalPin.P8 m1.defl=DigitalPin.P9 aux.defl=DigitalPin.P16 tx.defl=SerialPin.P14 rx.defl=SerialPin.P15 baud.defl=BaudRate.BaudRate9600 ConfigMode.defl=false
     export function e32Init(m0: DigitalPin, m1: DigitalPin, aux: DigitalPin, tx: SerialPin, rx: SerialPin, baud: BaudRate, ConfigMode: boolean) {
+
         serial.redirect(rx, tx, baud)
-        e32Pins.m0 = m0
-        e32Pins.m1 = m1
-        e32Pins.aux = aux
-        e32Pins.tx = tx
-        e32Pins.rx = rx
-        e32Pins.baud = baud
-        e32Pins.config = ConfigMode
+
+        e32Pins.m0 = m0;
+        e32Pins.m1 = m1;
+        e32Pins.aux = aux;
+        e32Pins.tx = tx;
+        e32Pins.rx = rx;
+        e32Pins.baud = baud;
+
+        e32Pins.config = ConfigMode;
         if (e32Pins.config) {
             setSetupMode()
-        } else {
+        }
+        else {
             setNormalMode()
         }
     }
 
-    //% block="når E32LORA mottar tekst"
-    //% blockGap=16
-    export function onReceivedString(cb: (mottatt: string) => void) {
+    /**
+     * Registers code to run when the radio receives a string.
+     */
+    //% help=radio/on-received-string
+    //% block="når e32radio mottar" blockGap=16
+    //% useLoc="E32LORA.onDataPacketReceived" draggableParameters=reporter
+    export function onReceivedString(cb: (receivedString: string) => void) {
         init();
         onReceivedStringHandler = cb;
     }
 
-    //% block="send tekst via E32LORA: %str"
+    /**
+     * e32SendString
+     */
+    //% block
+    //% weight=50
+    //% block="E32 Send Tekst: | %str"
     export function e32SendString(str: string) {
-        if (!e32Pins.config) {
+        if (e32Pins.config == false) {
             setNormalMode()
             serial.writeLine(str)
         }
     }
 
-    //% block="send tekst via E32LORA: %str TIL ADDRESSE: %addr KANAL: %channel"
+    /**
+     * e32SendStringFixed
+     */
+    //% block
+    //% weight=49
+    //% block="E32 Send Tekst: | %str til adresse: %addr kanal: %channel"
+    //% addr.defl=0 addr.min=0 addr.max=65535 channel.min=0 channel.max=31 channel.defl=15
     export function e32SendStringFixed(str: string, addr: number, channel: number) {
-        let addrString = ""
-        if (addr < 0 || addr > 65535) errorHalt(11)
-        if (channel < 0 || channel > 31) errorHalt(12)
 
-        if (addr <= 255) {
-            addrString = "00" + decToHexString(addr, 16)
-        } else {
-            let lo: NumberFormat.UInt8LE = addr & 0xff
-            let hi: NumberFormat.UInt8LE = (addr & 0xff00) >> 8
-            addrString = decToHexString(hi, 16) + decToHexString(lo, 16)
+        // Parameters check. Halt if errors found.
+        let addrString: string = "";
+        if (addr < 0 || addr > 65535) {
+            errorHalt(11);
+        }
+        if (channel < 0 || channel > 31) {
+            errorHalt(12);
         }
 
-        let byte3String: string = decToHexString(channel & 0x1f, 16)
+        if (addr <= 255) {
+            addrString = "00" + decToHexString(addr, 16);
+        }
+        else if (addr <= 65535) {
+            let lo: NumberFormat.UInt8LE = addr & 0xff;
+            let hi: NumberFormat.UInt8LE = (addr & 0xff00) >> 8;
+            addrString = decToHexString(hi, 16) + decToHexString(lo, 16);
+        }
+
+        let byte3String: string = decToHexString(channel & 0x1f, 16); // 0x00...0x1f
+
         let cmdBuffer = Buffer.fromHex(addrString + byte3String)
 
-        if (!e32Pins.config) {
+        if (e32Pins.config == false) {
             setNormalMode()
             serial.writeBuffer(cmdBuffer)
             serial.writeLine(str)
         }
     }
 
-    //% block="sett konfigurasjonsmodus"
+    /**
+     * setSetupMode
+     */
+    //% block
+    //% weight=42
     export function setSetupMode() {
         pins.digitalWritePin(e32Pins.m0, 1)
         pins.digitalWritePin(e32Pins.m1, 1)
         e32auxTimeout(100)
     }
 
-    //% block="sett normalmodus"
+    /**
+     * setNormalModus
+     */
+    //% block
+    //% weight=40
     export function setNormalMode() {
         pins.digitalWritePin(e32Pins.m0, 0)
         pins.digitalWritePin(e32Pins.m1, 0)
         e32auxTimeout(100)
     }
 
-    //% block="les AUX pin"
+    /**
+     * auxPin
+     */
+    //% block
+    //% weight=38
     export function auxPin() {
         return pins.digitalReadPin(e32Pins.aux)
     }
 
-    //% block="les E32-versjon"
+    /**
+     * e32versjon
+     */
+    //% block
+    //% weight=36
     export function e32version(): string {
         let rcvData: Buffer = null
         let params = ""
+
         setSetupMode()
-        let dataToSend = Buffer.fromHex("c3c3c3")
-        serial.writeBuffer(dataToSend)
+        let dataToSend2 = Buffer.fromHex("c3c3c3")
+        serial.writeBuffer(dataToSend2)
         rcvData = serial.readBuffer(4)
+
         let recArray = rcvData.toArray(NumberFormat.UInt8LE)
         for (let idx = 0; idx <= recArray.length - 1; idx++) {
-            params += decToHexString(recArray[idx], 16) + " "
+            params = "" + params + ("" + decToHexString(recArray[idx], 16) + " ")
         }
         setNormalMode()
         return params
     }
 
-    //% block="les E32 parametere"
-    export function e32parameters(): string {
-        let rcvData: Buffer = Buffer.create(6)
+    /**
+     * e32parametere
+     */
+    //% block
+    //% weight=34
+    export function e32parametere() {
+        let rcvData: Buffer = null
+        rcvData = Buffer.create(6)
+
         let params = ""
+
         setSetupMode()
         e32auxTimeout(200)
+
         let dataToSend = Buffer.fromHex("c1c1c1")
         serial.writeBuffer(dataToSend)
+
         rcvData = serial.readBuffer(6)
+
         let recArray = rcvData.toArray(NumberFormat.UInt8LE)
         for (let idx = 0; idx <= recArray.length - 1; idx++) {
-            params += decToHexString(recArray[idx], 16) + " "
+            params = "" + params + ("" + decToHexString(recArray[idx], 16) + " ")
         }
         setNormalMode()
         e32auxTimeout(200)
         return params
     }
 
-    //% block="tilbakestill E32"
+
+    /**
+     * e32reset
+     */
+    //% block
+    //% weight=34
     export function e32reset() {
         setSetupMode()
         let dataToSend = Buffer.fromHex("c4c4c4")
@@ -246,34 +335,72 @@ namespace E32LORA {
         e32auxTimeout(100)
     }
 
-    //% block="konfigurer E32LORA: | ADDRESSE: %addr KANAL: %channel FASTMODUS: %fixedm UART BAUD: %ubaud AIR BAUD: %airbaud POWER: %pwr LAGRE KONFIG: %save"
-    export function e32config(addr: number, channel: number, fixedm: boolean, ubaud: UartBaud, airbaud: AirBaud, pwr: number, save: boolean) {
-        if (!e32Pins.config) return
-        // Parametere sjekk
-        let addrString = ""
-        if (addr < 0 || addr > 65535) errorHalt(11)
-        if (channel < 0 || channel > 31) errorHalt(12)
-        if (pwr < 0 || pwr > 3) errorHalt(13)
 
-        if (addr <= 255) {
-            addrString = "00" + decToHexString(addr, 16)
-        } else {
-            let lo: NumberFormat.UInt8LE = addr & 0xff
-            let hi: NumberFormat.UInt8LE = (addr & 0xff00) >> 8
-            addrString = decToHexString(hi, 16) + decToHexString(lo, 16)
+    /**
+     * e32config
+     */
+    //% weight=46
+    //% block="Set E32LORA module configuration: | ADDR: %addr CHANNEL: %channel FIXED: %fixedm UART BAUD: %ubaud AIR BAUD: %airbaud POWER: %pwr SAVE CONFIG: %save"
+    //% addr.defl=0 addr.min=0 addr.max=65535 channel.min=0 channel.max=31 channel.defl=15 fixedm.defl=false ubaud.defl=UartBaud.BaudRate9600 airbaud.defl=AirBaud.BaudRate2400 pwr.defl=0 pwr.min=0 pwr.max=3 save.defl=false
+    export function e32config(addr: number, channel: number, fixedm: boolean, ubaud: UartBaud, airbaud: AirBaud, pwr: number, save: boolean) {
+
+        if (e32Pins.config == false) {
+            return;
         }
 
-        let byte1: NumberFormat.UInt8LE = save ? 0xc0 : 0xc2
-        let byte1String = decToHexString(byte1, 16)
-        let _uartbaud: NumberFormat.UInt8LE = parseInt(ubaud)
-        let _airbaud: NumberFormat.UInt8LE = parseInt(airbaud)
-        let byte3: NumberFormat.UInt8LE = ((_uartbaud << 3) + _airbaud) & 0x3f
-        let byte3String = decToHexString(byte3, 16)
-        let byte4String = decToHexString(channel & 0x1f, 16)
-        let byte5: NumberFormat.UInt8LE = fixedm ? 0xc4 + pwr : 0x44 + pwr
-        let byte5String = decToHexString(byte5, 16)
+        // Parameters check. Halt if errors found.
+        let addrString: string = "";
+        if (addr < 0 || addr > 65535) {
+            errorHalt(11);
+        }
+        if (channel < 0 || channel > 31) {
+            errorHalt(12);
+        }
+        if (pwr < 0 || pwr > 3) {
+            errorHalt(13);
+        }
 
+        if (addr <= 255) {
+            addrString = "00" + decToHexString(addr, 16);
+        }
+        else if (addr <= 65535) {
+            let lo: NumberFormat.UInt8LE = addr & 0xff;
+            let hi: NumberFormat.UInt8LE = (addr & 0xff00) >> 8;
+            addrString = decToHexString(hi, 16) + decToHexString(lo, 16);
+        }
+
+        let byte1: NumberFormat.UInt8LE = 0;
+        if (save == true) {
+            byte1 = 0xc0; // Save the parameters when power down
+        }
+        else {
+            byte1 = 0xc2; // Do not save the parameters when power down
+        }
+        let byte1String: string = decToHexString(byte1, 16);
+
+        let _uartbaud: NumberFormat.UInt8LE = parseInt(ubaud);
+        let _airbaud: NumberFormat.UInt8LE = parseInt(airbaud);
+
+        let byte3: NumberFormat.UInt8LE = ((_uartbaud << 3) + _airbaud) & 0x3f; // UART mode protection: 8N1 only available
+        let byte3String: string = decToHexString(byte3, 16);
+
+        let byte4String: string = decToHexString(channel & 0x1f, 16); // 0x00...0x1f
+
+        let _power: NumberFormat.UInt8LE = pwr;
+        let byte5: NumberFormat.UInt8LE;
+
+        // Set wireless wake-up time to default (250mc)
+        // Set TXD and AUX push-pull outputs to default (internal pull-up resistor)
+        // Turn on FEC (default)
+        if (fixedm == true) {
+            byte5 = 0xc4 + _power;
+        }
+        else {
+            byte5 = 0x44 + _power;
+        }
+        let byte5String = decToHexString(byte5, 16);
         let cmdBuffer = Buffer.fromHex(byte1String + addrString + byte3String + byte4String + byte5String)
+
         setSetupMode()
         e32auxTimeout(100)
         serial.writeBuffer(cmdBuffer)
@@ -281,22 +408,39 @@ namespace E32LORA {
         e32auxTimeout(100)
     }
 
-    // Avanserte funksjoner
-    //% block="til hex-streng"
+
+    // ==========================================================================
+    // Advanced Export Functions
+    // ==========================================================================
+
+    /**
+     * hexTekst
+     */
+    //% block
+    //% weight=20
     //% advanced=true
     export function hexString(value: number): string {
         return decToHexString(value, 16)
     }
 
-    //% block="til binær-streng"
+    /**
+     * binærTekst
+     */
+    //% block
+    //% weight=19
     //% advanced=true
     export function binaryString(value: number): string {
         return decToHexString(value, 2)
     }
 
-    //% block="til desimal-streng"
+    /**
+     * desimalTekst
+     */
+    //% block
+    //% weight=18
     //% advanced=true
     export function decimalString(value: number): string {
         return decToHexString(value, 10)
     }
+
 }
