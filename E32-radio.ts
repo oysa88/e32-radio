@@ -160,7 +160,7 @@ namespace pxtlora {
     //% block="E32 LoRa pin konfigurering:|M0: %m0 M1: %m1 AUX: %aux|TX: %tx RX: %rx BAUD: %baud Konfigureringsmodus: %ConfigMode"
     //% m0.defl=DigitalPin.P8 m1.defl=DigitalPin.P9 aux.defl=DigitalPin.P16 tx.defl=SerialPin.P14 rx.defl=SerialPin.P15 baud.defl=BaudRate.BaudRate9600 ConfigMode.defl=false
     //%group="Oppsett"
-    //% Konfigureringsmodus.shadow=toggleOnOff
+    //% ConfigMode.shadow=toggleOnOff
     export function e32Init(m0: DigitalPin, m1: DigitalPin, aux: DigitalPin, tx: SerialPin, rx: SerialPin, baud: BaudRate, ConfigMode: boolean) {
 
         serial.redirect(rx, tx, baud)
