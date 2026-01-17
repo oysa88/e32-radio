@@ -185,6 +185,7 @@ namespace pxtlora {
      */
     //% help=radio/on-received-string
     //% block="når e32radio mottar" blockGap=16
+    //% weight=48
     //% group="Sende/Motta"
     //% useLoc="E32LORA.onDataPacketReceived" draggableParameters=reporter
     export function onReceivedString(cb: (receivedString: string) => void) {
