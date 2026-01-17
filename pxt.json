@@ -7,8 +7,6 @@
         "microphone": "*"
     },
     "files": [
-        "main.blocks",
-        "main.ts",
         "README.md",
         "E32-radio.ts"
     ],
