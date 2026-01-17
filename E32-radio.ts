@@ -340,7 +340,7 @@ namespace pxtlora {
      * e32config
      */
     //% weight=46
-    //% block="Sett opp E32LoRa Konfigurasjons-modul: | Adresse: %addr Kanal: %channel Låse: %fixedm UART BAUD: %ubaud LUFT BAUD: %airbaud Effekt: %pwr Lagre Konfigurasjon: %save"
+    //% block="Sett opp E32LoRa Konfigurasjons-modul: | Adresse: %addr Kanal: %channel Låse oppsett: %fixedm UART BAUD: %ubaud LUFT BAUD: %airbaud Effekt: %pwr Lagre Konfigurasjon: %save"
     //% addr.defl=0 addr.min=0 addr.max=65535 channel.min=0 channel.max=31 channel.defl=15 fixedm.defl=false ubaud.defl=UartBaud.BaudRate9600 airbaud.defl=AirBaud.BaudRate2400 pwr.defl=0 pwr.min=0 pwr.max=3 save.defl=false
     export function e32config(addr: number, channel: number, fixedm: boolean, ubaud: UartBaud, airbaud: AirBaud, pwr: number, save: boolean) {
 
