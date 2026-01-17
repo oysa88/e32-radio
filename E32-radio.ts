@@ -1,35 +1,35 @@
 const enum UartBaud {
     //% block="1.2K"
-    BaudRate1200 = "0",
+    BaudRate1200 = 0,
     //% block="2.4K"
-    BaudRate2400 = "1",
+    BaudRate2400 = 1,
     //% block="4.8K"
-    BaudRate4800 = "2",
+    BaudRate4800 = 2,
     //% block="9.6K"
-    BaudRate9600 = "3",
+    BaudRate9600 = 3,
     //% block="19.2K"
-    BaudRate19200 = "4",
+    BaudRate19200 = 4,
     //% block="38.4K"
-    BaudRate38400 = "5",
+    BaudRate38400 = 5,
     //% block="57.6K"
-    BaudRate57600 = "6",
+    BaudRate57600 = 6,
     //% block="115.2K"
-    BaudRate115200 = "7"
+    BaudRate115200 = 7
 }
 
 const enum AirBaud {
     //% block="0.3K"
-    BaudRate300 = "0",
+    BaudRate300 = 0,
     //% block="1.2K"
-    BaudRate1200 = "1",
+    BaudRate1200 = 1,
     //% block="2.4K"
-    BaudRate2400 = "2",
+    BaudRate2400 = 2,
     //% block="4.8K"
-    BaudRate4800 = "3",
+    BaudRate4800 = 3,
     //% block="9.6K"
-    BaudRate9600 = "4",
+    BaudRate9600 = 4,
     //% block="19.2K"
-    BaudRate19200 = "5"
+    BaudRate19200 = 5
 }
 
 /**
@@ -394,8 +394,8 @@ namespace pxtlora {
         }
         let byte1String: string = decToHexString(byte1, 16);
 
-        let _uartbaud: NumberFormat.UInt8LE = parseInt(ubaud);
-        let _airbaud: NumberFormat.UInt8LE = parseInt(airbaud);
+        let _uartbaud = ubaud as number;
+        let _airbaud = airbaud as number;
 
         let byte3: NumberFormat.UInt8LE = ((_uartbaud << 3) + _airbaud) & 0x3f; // UART mode protection: 8N1 only available
         let byte3String: string = decToHexString(byte3, 16);
