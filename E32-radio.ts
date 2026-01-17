@@ -36,6 +36,7 @@ const enum AirBaud {
  * pxt-lora block
  */
 //% weight=91 color=#00cc00 icon="\uf1eb" block="E32 - Radio"
+//% groups=["Oppsett", "Sende/Motta", "Status", "Teksttype"]
 namespace pxtlora {
 
     /**
@@ -155,9 +156,10 @@ namespace pxtlora {
     /**
      * e32Init
      */
-    //% weight=44
+    //% weight=100
     //% block="E32 LoRa pin konfigurering:|M0: %m0 M1: %m1 AUX: %aux|TX: %tx RX: %rx BAUD: %baud Konfigureringsmodus: %ConfigMode"
     //% m0.defl=DigitalPin.P8 m1.defl=DigitalPin.P9 aux.defl=DigitalPin.P16 tx.defl=SerialPin.P14 rx.defl=SerialPin.P15 baud.defl=BaudRate.BaudRate9600 ConfigMode.defl=false
+    //%group="Oppsett"
     export function e32Init(m0: DigitalPin, m1: DigitalPin, aux: DigitalPin, tx: SerialPin, rx: SerialPin, baud: BaudRate, ConfigMode: boolean) {
 
         serial.redirect(rx, tx, baud)
@@ -183,6 +185,7 @@ namespace pxtlora {
      */
     //% help=radio/on-received-string
     //% block="når e32radio mottar" blockGap=16
+    //% group="Sende/Motta"
     //% useLoc="E32LORA.onDataPacketReceived" draggableParameters=reporter
     export function onReceivedString(cb: (receivedString: string) => void) {
         init();
@@ -194,6 +197,7 @@ namespace pxtlora {
      */
     //% block
     //% weight=50
+    //% group="Sende/Motta"
     //% block="E32 Send Tekst: | %str"
     export function e32SendString(str: string) {
         if (e32Pins.config == false) {
@@ -207,6 +211,7 @@ namespace pxtlora {
      */
     //% block
     //% weight=49
+    //% group="Sende/Motta"
     //% block="E32 Send Tekst: | %str til adresse: %addr kanal: %channel"
     //% addr.defl=0 addr.min=0 addr.max=65535 channel.min=0 channel.max=31 channel.defl=15
     export function e32SendStringFixed(str: string, addr: number, channel: number) {
@@ -243,7 +248,8 @@ namespace pxtlora {
     /**
      * setSetupModus
      */
-    //% block
+    //% block="Start Oppsettsmodus"
+    //% group="Oppsett"
     //% weight=42
     export function setSetupMode() {
         pins.digitalWritePin(e32Pins.m0, 1)
@@ -254,7 +260,8 @@ namespace pxtlora {
     /**
      * setNormalModus
      */
-    //% block
+    //% block="Start Normal Modus"
+    //% group="Oppsett"
     //% weight=40
     export function setNormalMode() {
         pins.digitalWritePin(e32Pins.m0, 0)
@@ -265,7 +272,8 @@ namespace pxtlora {
     /**
      * auxPin
      */
-    //% block
+    //% block="AUX Pin"
+    //% group="Status"
     //% weight=38
     export function auxPin() {
         return pins.digitalReadPin(e32Pins.aux)
@@ -274,7 +282,8 @@ namespace pxtlora {
     /**
      * e32versjon
      */
-    //% block
+    //% block="E32 Versjon"
+    //% group="Status"
     //% weight=36
     export function e32version(): string {
         let rcvData: Buffer = null
@@ -296,7 +305,8 @@ namespace pxtlora {
     /**
      * e32parametere
      */
-    //% block
+    //% block="E32 Parametere"
+    //% group="Status"
     //% weight=34
     export function e32parameters() {
         let rcvData: Buffer = null
@@ -325,7 +335,8 @@ namespace pxtlora {
     /**
      * e32restart
      */
-    //% block
+    //% block="E32 Restart"
+    //% group="Status"
     //% weight=34
     export function e32reset() {
         setSetupMode()
@@ -339,9 +350,10 @@ namespace pxtlora {
     /**
      * e32config
      */
-    //% weight=46
+    //% weight=90
     //% block="Sett opp E32LoRa Konfigurasjons-modul: | Adresse: %addr Kanal: %channel Låse oppsett: %fixedm UART BAUD: %ubaud LUFT BAUD: %airbaud Effekt: %pwr Lagre Konfigurasjon: %save"
     //% addr.defl=0 addr.min=0 addr.max=65535 channel.min=0 channel.max=31 channel.defl=15 fixedm.defl=false ubaud.defl=UartBaud.BaudRate9600 airbaud.defl=AirBaud.BaudRate2400 pwr.defl=0 pwr.min=0 pwr.max=3 save.defl=false
+    //% group="Oppsett"
     export function e32config(addr: number, channel: number, fixedm: boolean, ubaud: UartBaud, airbaud: AirBaud, pwr: number, save: boolean) {
 
         if (e32Pins.config == false) {
@@ -416,8 +428,9 @@ namespace pxtlora {
     /**
      * hexTekst
      */
-    //% block
+    //% block="Tekst - Hex" 
     //% weight=20
+    //% group="Teksttype"
     //% advanced=true
     export function hexString(value: number): string {
         return decToHexString(value, 16)
@@ -426,8 +439,9 @@ namespace pxtlora {
     /**
      * binærTekst
      */
-    //% block
+    //% block="Tekst - Binær"
     //% weight=19
+    //% group="Teksttype"
     //% advanced=true
     export function binaryString(value: number): string {
         return decToHexString(value, 2)
@@ -436,8 +450,9 @@ namespace pxtlora {
     /**
      * desimalTekst
      */
-    //% block
+    //% block="Tekst - Desimal"
     //% weight=18
+    //% group="Teksttype"
     //% advanced=true
     export function decimalString(value: number): string {
         return decToHexString(value, 10)
