@@ -35,8 +35,8 @@ const enum AirBaud {
 /**
  * pxt-lora block
  */
-//% weight=91 color=#00cc00 icon="\uf1eb" block="E32 - Radio"
 //% groups=["Kommunikasjon", "Oppsett", "Status", "Teksttype"]
+//% weight=91 color=#00cc00 icon="\uf1eb" block="E32 - Radio"
 namespace pxtlora {
 
     /**
