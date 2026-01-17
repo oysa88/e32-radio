@@ -153,47 +153,7 @@ namespace pxtlora {
     // Export Functions.
     // ==========================================================================
 
-    /**
-     * e32Init
-     */
-    //% weight=50
-    //% block="E32 LoRa pin konfigurering:|M0: %m0 M1: %m1 AUX: %aux|TX: %tx RX: %rx BAUD: %baud Konfigureringsmodus: %ConfigMode"
-    //% m0.defl=DigitalPin.P8 m1.defl=DigitalPin.P9 aux.defl=DigitalPin.P16 tx.defl=SerialPin.P14 rx.defl=SerialPin.P15 baud.defl=BaudRate.BaudRate9600 ConfigMode.defl=false
-    //%group="Oppsett"
-    //% ConfigMode.shadow=toggleOnOff
-    export function e32Init(m0: DigitalPin, m1: DigitalPin, aux: DigitalPin, tx: SerialPin, rx: SerialPin, baud: BaudRate, ConfigMode: boolean) {
-
-        serial.redirect(rx, tx, baud)
-
-        e32Pins.m0 = m0;
-        e32Pins.m1 = m1;
-        e32Pins.aux = aux;
-        e32Pins.tx = tx;
-        e32Pins.rx = rx;
-        e32Pins.baud = baud;
-
-        e32Pins.config = ConfigMode;
-        if (e32Pins.config) {
-            setSetupMode()
-        }
-        else {
-            setNormalMode()
-        }
-    }
-
-    /**
-     * Registers code to run when the radio receives a string.
-     */
-    //% help=radio/on-received-string
-    //% block="når e32radio mottar" blockGap=16
-    //% weight=98
-    //% group="Kommunikasjon"
-    //% useLoc="E32LORA.onDataPacketReceived" draggableParameters=reporter
-    export function onReceivedString(cb: (receivedString: string) => void) {
-        init();
-        onReceivedStringHandler = cb;
-    }
-
+    
     /**
      * e32SendString
      */
@@ -248,6 +208,19 @@ namespace pxtlora {
     }
 
     /**
+     * Registers code to run when the radio receives a string.
+     */
+    //% help=radio/on-received-string
+    //% block="når e32radio mottar" blockGap=16
+    //% weight=98
+    //% group="Kommunikasjon"
+    //% useLoc="E32LORA.onDataPacketReceived" draggableParameters=reporter
+    export function onReceivedString(cb: (receivedString: string) => void) {
+        init();
+        onReceivedStringHandler = cb;
+    }
+    
+    /**
      * setSetupModus
      */
     //% block="Start Oppsettsmodus"
@@ -256,6 +229,109 @@ namespace pxtlora {
     export function setSetupMode() {
         pins.digitalWritePin(e32Pins.m0, 1)
         pins.digitalWritePin(e32Pins.m1, 1)
+        e32auxTimeout(100)
+    }
+
+    /**
+     * e32Init
+     */
+    //% weight=50
+    //% block="E32 LoRa pin konfigurering:|M0: %m0 M1: %m1 AUX: %aux|TX: %tx RX: %rx BAUD: %baud Konfigureringsmodus: %ConfigMode"
+    //% m0.defl=DigitalPin.P8 m1.defl=DigitalPin.P9 aux.defl=DigitalPin.P16 tx.defl=SerialPin.P14 rx.defl=SerialPin.P15 baud.defl=BaudRate.BaudRate9600 ConfigMode.defl=false
+    //%group="Oppsett"
+    //% ConfigMode.shadow=toggleOnOff
+    export function e32Init(m0: DigitalPin, m1: DigitalPin, aux: DigitalPin, tx: SerialPin, rx: SerialPin, baud: BaudRate, ConfigMode: boolean) {
+
+        serial.redirect(rx, tx, baud)
+
+        e32Pins.m0 = m0;
+        e32Pins.m1 = m1;
+        e32Pins.aux = aux;
+        e32Pins.tx = tx;
+        e32Pins.rx = rx;
+        e32Pins.baud = baud;
+
+        e32Pins.config = ConfigMode;
+        if (e32Pins.config) {
+            setSetupMode()
+        }
+        else {
+            setNormalMode()
+        }
+    }
+
+    /**
+     * e32config
+     */
+    //% weight=49
+    //% block="Sett opp E32LoRa Konfigurasjons-modul: | Adresse: %addr Kanal: %channel Låse oppsett: %fixedm UART BAUD: %ubaud LUFT BAUD: %airbaud Effekt: %pwr Lagre Konfigurasjon: %save"
+    //% addr.defl=0 addr.min=0 addr.max=65535 channel.min=0 channel.max=31 channel.defl=15 fixedm.defl=false ubaud.defl=UartBaud.BaudRate9600 airbaud.defl=AirBaud.BaudRate2400 pwr.defl=0 pwr.min=0 pwr.max=3 save.defl=false
+    //% group="Oppsett"
+    //% fixedm.shadow=toggleOnOff
+    //% save.shadow=toggleOnOff
+    export function e32config(addr: number, channel: number, fixedm: boolean, ubaud: UartBaud, airbaud: AirBaud, pwr: number, save: boolean) {
+
+        if (e32Pins.config == false) {
+            return;
+        }
+
+        // Parameters check. Halt if errors found.
+        let addrString: string = "";
+        if (addr < 0 || addr > 65535) {
+            errorHalt(11);
+        }
+        if (channel < 0 || channel > 31) {
+            errorHalt(12);
+        }
+        if (pwr < 0 || pwr > 3) {
+            errorHalt(13);
+        }
+
+        if (addr <= 255) {
+            addrString = "00" + decToHexString(addr, 16);
+        }
+        else if (addr <= 65535) {
+            let lo: NumberFormat.UInt8LE = addr & 0xff;
+            let hi: NumberFormat.UInt8LE = (addr & 0xff00) >> 8;
+            addrString = decToHexString(hi, 16) + decToHexString(lo, 16);
+        }
+
+        let byte1: NumberFormat.UInt8LE = 0;
+        if (save == true) {
+            byte1 = 0xc0; // Save the parameters when power down
+        }
+        else {
+            byte1 = 0xc2; // Do not save the parameters when power down
+        }
+        let byte1String: string = decToHexString(byte1, 16);
+
+        let _uartbaud = ubaud as number;
+        let _airbaud = airbaud as number;
+
+        let byte3: NumberFormat.UInt8LE = ((_uartbaud << 3) + _airbaud) & 0x3f; // UART mode protection: 8N1 only available
+        let byte3String: string = decToHexString(byte3, 16);
+
+        let byte4String: string = decToHexString(channel & 0x1f, 16); // 0x00...0x1f
+
+        let _power: NumberFormat.UInt8LE = pwr;
+        let byte5: NumberFormat.UInt8LE;
+
+        // Set wireless wake-up time to default (250mc)
+        // Set TXD and AUX push-pull outputs to default (internal pull-up resistor)
+        // Turn on FEC (default)
+        if (fixedm == true) {
+            byte5 = 0xc4 + _power;
+        }
+        else {
+            byte5 = 0x44 + _power;
+        }
+        let byte5String = decToHexString(byte5, 16);
+        let cmdBuffer = Buffer.fromHex(byte1String + addrString + byte3String + byte4String + byte5String)
+
+        setSetupMode()
+        e32auxTimeout(100)
+        serial.writeBuffer(cmdBuffer)
+        setNormalMode()
         e32auxTimeout(100)
     }
 
@@ -344,82 +420,6 @@ namespace pxtlora {
         setSetupMode()
         let dataToSend = Buffer.fromHex("c4c4c4")
         serial.writeBuffer(dataToSend)
-        setNormalMode()
-        e32auxTimeout(100)
-    }
-
-
-    /**
-     * e32config
-     */
-    //% weight=49
-    //% block="Sett opp E32LoRa Konfigurasjons-modul: | Adresse: %addr Kanal: %channel Låse oppsett: %fixedm UART BAUD: %ubaud LUFT BAUD: %airbaud Effekt: %pwr Lagre Konfigurasjon: %save"
-    //% addr.defl=0 addr.min=0 addr.max=65535 channel.min=0 channel.max=31 channel.defl=15 fixedm.defl=false ubaud.defl=UartBaud.BaudRate9600 airbaud.defl=AirBaud.BaudRate2400 pwr.defl=0 pwr.min=0 pwr.max=3 save.defl=false
-    //% group="Oppsett"
-    //% fixedm.shadow=toggleOnOff
-    //% save.shadow=toggleOnOff
-    export function e32config(addr: number, channel: number, fixedm: boolean, ubaud: UartBaud, airbaud: AirBaud, pwr: number, save: boolean) {
-
-        if (e32Pins.config == false) {
-            return;
-        }
-
-        // Parameters check. Halt if errors found.
-        let addrString: string = "";
-        if (addr < 0 || addr > 65535) {
-            errorHalt(11);
-        }
-        if (channel < 0 || channel > 31) {
-            errorHalt(12);
-        }
-        if (pwr < 0 || pwr > 3) {
-            errorHalt(13);
-        }
-
-        if (addr <= 255) {
-            addrString = "00" + decToHexString(addr, 16);
-        }
-        else if (addr <= 65535) {
-            let lo: NumberFormat.UInt8LE = addr & 0xff;
-            let hi: NumberFormat.UInt8LE = (addr & 0xff00) >> 8;
-            addrString = decToHexString(hi, 16) + decToHexString(lo, 16);
-        }
-
-        let byte1: NumberFormat.UInt8LE = 0;
-        if (save == true) {
-            byte1 = 0xc0; // Save the parameters when power down
-        }
-        else {
-            byte1 = 0xc2; // Do not save the parameters when power down
-        }
-        let byte1String: string = decToHexString(byte1, 16);
-
-        let _uartbaud = ubaud as number;
-        let _airbaud = airbaud as number;
-
-        let byte3: NumberFormat.UInt8LE = ((_uartbaud << 3) + _airbaud) & 0x3f; // UART mode protection: 8N1 only available
-        let byte3String: string = decToHexString(byte3, 16);
-
-        let byte4String: string = decToHexString(channel & 0x1f, 16); // 0x00...0x1f
-
-        let _power: NumberFormat.UInt8LE = pwr;
-        let byte5: NumberFormat.UInt8LE;
-
-        // Set wireless wake-up time to default (250mc)
-        // Set TXD and AUX push-pull outputs to default (internal pull-up resistor)
-        // Turn on FEC (default)
-        if (fixedm == true) {
-            byte5 = 0xc4 + _power;
-        }
-        else {
-            byte5 = 0x44 + _power;
-        }
-        let byte5String = decToHexString(byte5, 16);
-        let cmdBuffer = Buffer.fromHex(byte1String + addrString + byte3String + byte4String + byte5String)
-
-        setSetupMode()
-        e32auxTimeout(100)
-        serial.writeBuffer(cmdBuffer)
         setNormalMode()
         e32auxTimeout(100)
     }
