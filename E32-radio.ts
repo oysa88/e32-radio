@@ -36,7 +36,7 @@ const enum AirBaud {
  * pxt-lora block
  */
 //% weight=91 color=#00cc00 icon="\uf1eb" block="E32 - Radio"
-//% groups=["Sende/Motta", "Oppsett", "Status", "Teksttype"]
+//% groups=["Kommunikasjon", "Oppsett", "Status", "Teksttype"]
 namespace pxtlora {
 
     /**
@@ -186,7 +186,7 @@ namespace pxtlora {
     //% help=radio/on-received-string
     //% block="når e32radio mottar" blockGap=16
     //% weight=98
-    //% group="Sende/Motta"
+    //% group="Kommunikasjon"
     //% useLoc="E32LORA.onDataPacketReceived" draggableParameters=reporter
     export function onReceivedString(cb: (receivedString: string) => void) {
         init();
@@ -198,7 +198,7 @@ namespace pxtlora {
      */
     //% block
     //% weight=100
-    //% group="Sende/Motta"
+    //% group="Kommunikasjon"
     //% block="E32 Send Tekst: | %str"
     export function e32SendString(str: string) {
         if (e32Pins.config == false) {
@@ -212,7 +212,7 @@ namespace pxtlora {
      */
     //% block
     //% weight=99
-    //% group="Sende/Motta"
+    //% group="Kommunikasjon"
     //% block="E32 Send Tekst: | %str til adresse: %addr kanal: %channel"
     //% addr.defl=0 addr.min=0 addr.max=65535 channel.min=0 channel.max=31 channel.defl=15
     export function e32SendStringFixed(str: string, addr: number, channel: number) {
