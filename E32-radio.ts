@@ -160,6 +160,7 @@ namespace pxtlora {
     //% block="E32 LoRa pin konfigurering:|M0: %m0 M1: %m1 AUX: %aux|TX: %tx RX: %rx BAUD: %baud Konfigureringsmodus: %ConfigMode"
     //% m0.defl=DigitalPin.P8 m1.defl=DigitalPin.P9 aux.defl=DigitalPin.P16 tx.defl=SerialPin.P14 rx.defl=SerialPin.P15 baud.defl=BaudRate.BaudRate9600 ConfigMode.defl=false
     //%group="Oppsett"
+    //% Konfigureringsmodus.shadow=toggleOnOff
     export function e32Init(m0: DigitalPin, m1: DigitalPin, aux: DigitalPin, tx: SerialPin, rx: SerialPin, baud: BaudRate, ConfigMode: boolean) {
 
         serial.redirect(rx, tx, baud)
@@ -355,6 +356,7 @@ namespace pxtlora {
     //% block="Sett opp E32LoRa Konfigurasjons-modul: | Adresse: %addr Kanal: %channel Låse oppsett: %fixedm UART BAUD: %ubaud LUFT BAUD: %airbaud Effekt: %pwr Lagre Konfigurasjon: %save"
     //% addr.defl=0 addr.min=0 addr.max=65535 channel.min=0 channel.max=31 channel.defl=15 fixedm.defl=false ubaud.defl=UartBaud.BaudRate9600 airbaud.defl=AirBaud.BaudRate2400 pwr.defl=0 pwr.min=0 pwr.max=3 save.defl=false
     //% group="Oppsett"
+    //% fixedm.shadow=toggleOnOff
     //% save.shadow=toggleOnOff
     export function e32config(addr: number, channel: number, fixedm: boolean, ubaud: UartBaud, airbaud: AirBaud, pwr: number, save: boolean) {
 
