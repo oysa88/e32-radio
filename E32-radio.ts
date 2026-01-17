@@ -156,7 +156,7 @@ namespace pxtlora {
     /**
      * e32Init
      */
-    //% weight=100
+    //% weight=91
     //% block="E32 LoRa pin konfigurering:|M0: %m0 M1: %m1 AUX: %aux|TX: %tx RX: %rx BAUD: %baud Konfigureringsmodus: %ConfigMode"
     //% m0.defl=DigitalPin.P8 m1.defl=DigitalPin.P9 aux.defl=DigitalPin.P16 tx.defl=SerialPin.P14 rx.defl=SerialPin.P15 baud.defl=BaudRate.BaudRate9600 ConfigMode.defl=false
     //%group="Oppsett"
@@ -185,7 +185,7 @@ namespace pxtlora {
      */
     //% help=radio/on-received-string
     //% block="når e32radio mottar" blockGap=16
-    //% weight=48
+    //% weight=98
     //% group="Sende/Motta"
     //% useLoc="E32LORA.onDataPacketReceived" draggableParameters=reporter
     export function onReceivedString(cb: (receivedString: string) => void) {
@@ -197,7 +197,7 @@ namespace pxtlora {
      * e32SendString
      */
     //% block
-    //% weight=50
+    //% weight=100
     //% group="Sende/Motta"
     //% block="E32 Send Tekst: | %str"
     export function e32SendString(str: string) {
@@ -211,7 +211,7 @@ namespace pxtlora {
      * e32SendStringFixed
      */
     //% block
-    //% weight=49
+    //% weight=99
     //% group="Sende/Motta"
     //% block="E32 Send Tekst: | %str til adresse: %addr kanal: %channel"
     //% addr.defl=0 addr.min=0 addr.max=65535 channel.min=0 channel.max=31 channel.defl=15
