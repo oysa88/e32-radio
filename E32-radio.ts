@@ -1,42 +1,41 @@
 const enum UartBaud {
     //% block="1.2K"
-    BaudRate1200 = 0,
+    BaudRate1200 = "0",
     //% block="2.4K"
-    BaudRate2400 = 1,
+    BaudRate2400 = "1",
     //% block="4.8K"
-    BaudRate4800 = 2,
+    BaudRate4800 = "2",
     //% block="9.6K"
-    BaudRate9600 = 3,
+    BaudRate9600 = "3",
     //% block="19.2K"
-    BaudRate19200 = 4,
+    BaudRate19200 = "4",
     //% block="38.4K"
-    BaudRate38400 = 5,
+    BaudRate38400 = "5",
     //% block="57.6K"
-    BaudRate57600 = 6,
+    BaudRate57600 = "6",
     //% block="115.2K"
-    BaudRate115200 = 7
+    BaudRate115200 = "7"
 }
 
 const enum AirBaud {
     //% block="0.3K"
-    BaudRate300 = 0,
+    BaudRate300 = "0",
     //% block="1.2K"
-    BaudRate1200 = 1,
+    BaudRate1200 = "1",
     //% block="2.4K"
-    BaudRate2400 = 2,
+    BaudRate2400 = "2",
     //% block="4.8K"
-    BaudRate4800 = 3,
+    BaudRate4800 = "3",
     //% block="9.6K"
-    BaudRate9600 = 4,
+    BaudRate9600 = "4",
     //% block="19.2K"
-    BaudRate19200 = 5
+    BaudRate19200 = "5"
 }
 
 /**
  * pxt-lora block
  */
-//% groups=["Kommunikasjon", "Oppsett", "Status", "Teksttype"]
-//% weight=91 color=#00cc00 icon="\uf1eb" block="E32 - Radio"
+//% weight=100 color=#00cc00 icon="\uf012" block="E32 Radio"
 namespace pxtlora {
 
     /**
@@ -81,7 +80,7 @@ namespace pxtlora {
         basic.pause(value)
         if (auxPin() == 0) {
             basic.showIcon(IconNames.Angry)
-            basic.showString("e: aux timeout")
+            basic.clearScreen()
         }
     }
 
@@ -153,14 +152,27 @@ namespace pxtlora {
     // Export Functions.
     // ==========================================================================
 
-    
+
+    /**
+     * Registers code to run when the radio receives a string.
+     */
+    //% help=radio/on-received-string
+    //% block="når e32radio mottar" blockGap=16
+    //% useLoc="E32LORA.onDataPacketReceived" draggableParameters=reporter
+    //% group="Kommunikasjon"
+    //% weight=90
+    export function onReceivedString(cb: (receivedString: string) => void) {
+        init();
+        onReceivedStringHandler = cb;
+    }
+
     /**
      * e32SendString
      */
     //% block
     //% weight=100
+    //% block="E32 Send tekst: | %str"
     //% group="Kommunikasjon"
-    //% block="E32 Send Tekst: | %str"
     export function e32SendString(str: string) {
         if (e32Pins.config == false) {
             setNormalMode()
@@ -172,10 +184,10 @@ namespace pxtlora {
      * e32SendStringFixed
      */
     //% block
-    //% weight=99
-    //% group="Kommunikasjon"
-    //% block="E32 Send Tekst: | %str til adresse: %addr kanal: %channel"
+    //% weight=95
+    //% block="E32 Send tekst: | %str Til adresse: %addr Kanal: %channel"
     //% addr.defl=0 addr.min=0 addr.max=65535 channel.min=0 channel.max=31 channel.defl=15
+    //% group="Kommunikasjon"
     export function e32SendStringFixed(str: string, addr: number, channel: number) {
 
         // Parameters check. Halt if errors found.
@@ -208,38 +220,12 @@ namespace pxtlora {
     }
 
     /**
-     * Registers code to run when the radio receives a string.
-     */
-    //% help=radio/on-received-string
-    //% block="når e32radio mottar" blockGap=16
-    //% weight=98
-    //% group="Kommunikasjon"
-    //% useLoc="E32LORA.onDataPacketReceived" draggableParameters=reporter
-    export function onReceivedString(cb: (receivedString: string) => void) {
-        init();
-        onReceivedStringHandler = cb;
-    }
-    
-    /**
-     * setSetupModus
-     */
-    //% block="Start Oppsettsmodus"
-    //% group="Oppsett"
-    //% weight=42
-    export function setSetupMode() {
-        pins.digitalWritePin(e32Pins.m0, 1)
-        pins.digitalWritePin(e32Pins.m1, 1)
-        e32auxTimeout(100)
-    }
-
-    /**
-     * e32Init
-     */
-    //% weight=50
-    //% block="E32 LoRa pin konfigurering:|M0: %m0 M1: %m1 AUX: %aux|TX: %tx RX: %rx BAUD: %baud Konfigureringsmodus: %ConfigMode"
+    * e32Init
+    */
+    //% weight=100
+    //% block="E32 radio pin konfigurasjon:|M0: %m0 M1: %m1 AUX: %aux|TX: %tx RX: %rx BAUD: %baud Konfigurasjonsmodus: %ConfigMode"
     //% m0.defl=DigitalPin.P8 m1.defl=DigitalPin.P9 aux.defl=DigitalPin.P16 tx.defl=SerialPin.P14 rx.defl=SerialPin.P15 baud.defl=BaudRate.BaudRate9600 ConfigMode.defl=false
-    //%group="Oppsett"
-    //% ConfigMode.shadow=toggleOnOff
+    //% group="Oppsett"
     export function e32Init(m0: DigitalPin, m1: DigitalPin, aux: DigitalPin, tx: SerialPin, rx: SerialPin, baud: BaudRate, ConfigMode: boolean) {
 
         serial.redirect(rx, tx, baud)
@@ -260,15 +246,116 @@ namespace pxtlora {
         }
     }
 
+
+    /**
+     * setSetupMode
+     */
+    //% block="start oppsettmodus"
+    //% weight=42
+    //% group="Oppsett"
+    export function setSetupMode() {
+        pins.digitalWritePin(e32Pins.m0, 1)
+        pins.digitalWritePin(e32Pins.m1, 1)
+        e32auxTimeout(100)
+    }
+
+    /**
+     * setNormalMode
+     */
+    //% block="start normalmodus"
+    //% weight=40
+    //% group="Oppsett"
+    export function setNormalMode() {
+        pins.digitalWritePin(e32Pins.m0, 0)
+        pins.digitalWritePin(e32Pins.m1, 0)
+        e32auxTimeout(100)
+    }
+
+    /**
+     * auxPin
+     */
+    //% block=
+    //% weight=38
+    //% group="Status"
+    export function auxPin() {
+        return pins.digitalReadPin(e32Pins.aux)
+    }
+
+    /**
+     * e32version
+     */
+    //% block="E32 versjon"
+    //% group="Status"
+    //% weight=36
+    export function e32version(): string {
+        let rcvData: Buffer = null
+        let params = ""
+
+        setSetupMode()
+        let dataToSend2 = Buffer.fromHex("c3c3c3")
+        serial.writeBuffer(dataToSend2)
+        rcvData = serial.readBuffer(4)
+
+        let recArray = rcvData.toArray(NumberFormat.UInt8LE)
+        for (let idx = 0; idx <= recArray.length - 1; idx++) {
+            params = "" + params + ("" + decToHexString(recArray[idx], 16) + " ")
+        }
+        setNormalMode()
+        return params
+    }
+
+    /**
+     * e32parameters
+     */
+    //% block="E32 parametere"
+    //% group="Status"
+    //% weight=34
+    export function e32parameters() {
+        let rcvData: Buffer = null
+        rcvData = Buffer.create(6)
+
+        let params = ""
+
+        setSetupMode()
+        e32auxTimeout(200)
+
+        let dataToSend = Buffer.fromHex("c1c1c1")
+        serial.writeBuffer(dataToSend)
+
+        rcvData = serial.readBuffer(6)
+
+        let recArray = rcvData.toArray(NumberFormat.UInt8LE)
+        for (let idx = 0; idx <= recArray.length - 1; idx++) {
+            params = "" + params + ("" + decToHexString(recArray[idx], 16) + " ")
+        }
+        setNormalMode()
+        e32auxTimeout(200)
+        return params
+    }
+
+
+    /**
+     * e32reset
+     */
+    //% block="E32 restart"
+    //% group="Oppsett"
+    //% weight=34
+    export function e32reset() {
+        setSetupMode()
+        let dataToSend = Buffer.fromHex("c4c4c4")
+        serial.writeBuffer(dataToSend)
+        setNormalMode()
+        e32auxTimeout(100)
+    }
+
+
     /**
      * e32config
      */
-    //% weight=49
-    //% block="Sett opp E32LoRa Konfigurasjons-modul: | Adresse: %addr Kanal: %channel Låse oppsett: %fixedm UART BAUD: %ubaud LUFT BAUD: %airbaud Effekt: %pwr Lagre Konfigurasjon: %save"
+    //% weight=90
+    //% block="Sett E32 radiomodul konfigurasjon: | Adresse: %addr Kanal: %channel Låst: %fixedm UART BAUD: %ubaud LUFT BAUD: %airbaud Effekt: %pwr Lagre konfigurasjon: %save"
     //% addr.defl=0 addr.min=0 addr.max=65535 channel.min=0 channel.max=31 channel.defl=15 fixedm.defl=false ubaud.defl=UartBaud.BaudRate9600 airbaud.defl=AirBaud.BaudRate2400 pwr.defl=0 pwr.min=0 pwr.max=3 save.defl=false
     //% group="Oppsett"
-    //% fixedm.shadow=toggleOnOff
-    //% save.shadow=toggleOnOff
     export function e32config(addr: number, channel: number, fixedm: boolean, ubaud: UartBaud, airbaud: AirBaud, pwr: number, save: boolean) {
 
         if (e32Pins.config == false) {
@@ -305,8 +392,8 @@ namespace pxtlora {
         }
         let byte1String: string = decToHexString(byte1, 16);
 
-        let _uartbaud = ubaud as number;
-        let _airbaud = airbaud as number;
+        let _uartbaud: NumberFormat.UInt8LE = parseInt(ubaud);
+        let _airbaud: NumberFormat.UInt8LE = parseInt(airbaud);
 
         let byte3: NumberFormat.UInt8LE = ((_uartbaud << 3) + _airbaud) & 0x3f; // UART mode protection: 8N1 only available
         let byte3String: string = decToHexString(byte3, 16);
@@ -331,95 +418,7 @@ namespace pxtlora {
         setSetupMode()
         e32auxTimeout(100)
         serial.writeBuffer(cmdBuffer)
-        setNormalMode()
-        e32auxTimeout(100)
-    }
-
-    /**
-     * setNormalModus
-     */
-    //% block="Start Normal Modus"
-    //% group="Oppsett"
-    //% weight=40
-    export function setNormalMode() {
-        pins.digitalWritePin(e32Pins.m0, 0)
-        pins.digitalWritePin(e32Pins.m1, 0)
-        e32auxTimeout(100)
-    }
-
-    /**
-     * auxPin
-     */
-    //% block="AUX Pin"
-    //% group="Status"
-    //% weight=38
-    export function auxPin() {
-        return pins.digitalReadPin(e32Pins.aux)
-    }
-
-    /**
-     * e32versjon
-     */
-    //% block="E32 Versjon"
-    //% group="Status"
-    //% weight=36
-    export function e32version(): string {
-        let rcvData: Buffer = null
-        let params = ""
-
-        setSetupMode()
-        let dataToSend2 = Buffer.fromHex("c3c3c3")
-        serial.writeBuffer(dataToSend2)
-        rcvData = serial.readBuffer(4)
-
-        let recArray = rcvData.toArray(NumberFormat.UInt8LE)
-        for (let idx = 0; idx <= recArray.length - 1; idx++) {
-            params = "" + params + ("" + decToHexString(recArray[idx], 16) + " ")
-        }
-        setNormalMode()
-        return params
-    }
-
-    /**
-     * e32parametere
-     */
-    //% block="E32 Parametere"
-    //% group="Status"
-    //% weight=34
-    export function e32parameters() {
-        let rcvData: Buffer = null
-        rcvData = Buffer.create(6)
-
-        let params = ""
-
-        setSetupMode()
-        e32auxTimeout(200)
-
-        let dataToSend = Buffer.fromHex("c1c1c1")
-        serial.writeBuffer(dataToSend)
-
-        rcvData = serial.readBuffer(6)
-
-        let recArray = rcvData.toArray(NumberFormat.UInt8LE)
-        for (let idx = 0; idx <= recArray.length - 1; idx++) {
-            params = "" + params + ("" + decToHexString(recArray[idx], 16) + " ")
-        }
-        setNormalMode()
-        e32auxTimeout(200)
-        return params
-    }
-
-
-    /**
-     * e32restart
-     */
-    //% block="E32 Restart"
-    //% group="Status"
-    //% weight=34
-    export function e32reset() {
-        setSetupMode()
-        let dataToSend = Buffer.fromHex("c4c4c4")
-        serial.writeBuffer(dataToSend)
+        basic.pause(10)
         setNormalMode()
         e32auxTimeout(100)
     }
@@ -430,36 +429,34 @@ namespace pxtlora {
     // ==========================================================================
 
     /**
-     * hexTekst
+     * hexString
      */
-    //% block="Tekst - Hex" 
+    //% block
     //% weight=20
-    //% group="Teksttype"
     //% advanced=true
     export function hexString(value: number): string {
         return decToHexString(value, 16)
     }
 
     /**
-     * binærTekst
+     * binaryString
      */
-    //% block="Tekst - Binær"
+    //% block
     //% weight=19
-    //% group="Teksttype"
     //% advanced=true
     export function binaryString(value: number): string {
         return decToHexString(value, 2)
     }
 
     /**
-     * desimalTekst
+     * decimalString
      */
-    //% block="Tekst - Desimal"
+    //% block
     //% weight=18
-    //% group="Teksttype"
     //% advanced=true
     export function decimalString(value: number): string {
         return decToHexString(value, 10)
     }
 
 }
+
