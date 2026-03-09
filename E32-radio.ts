@@ -224,7 +224,7 @@ namespace pxtlora {
     */
     //% weight=100
     //% block="E32 radio pin konfigurasjon:|M0: %m0 M1: %m1 AUX: %aux|TX: %tx RX: %rx BAUD: %baud Konfigurasjonsmodus: %ConfigMode"
-    //% m0.defl=DigitalPin.P8 m1.defl=DigitalPin.P9 aux.defl=DigitalPin.P16 tx.defl=SerialPin.P14 rx.defl=SerialPin.P15 baud.defl=BaudRate.BaudRate9600 ConfigMode.defl=false
+    //% m0.defl=DigitalPin.P9 m1.defl=DigitalPin.P8 aux.defl=DigitalPin.P16 tx.defl=SerialPin.P14 rx.defl=SerialPin.P15 baud.defl=BaudRate.BaudRate9600 ConfigMode.defl=false
     //% group="Oppsett"
     export function e32Init(m0: DigitalPin, m1: DigitalPin, aux: DigitalPin, tx: SerialPin, rx: SerialPin, baud: BaudRate, ConfigMode: boolean) {
 
