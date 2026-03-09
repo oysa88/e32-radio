@@ -64,7 +64,9 @@ namespace pxtlora {
     serial.onDataReceived(serial.delimiters(Delimiters.NewLine), function () {
         if (e32Pins.config == false) {
             let str: string = serial.readString()
-            onReceivedStringHandler(str)
+            if (onReceivedStringHandler) {
+                onReceivedStringHandler(str)
+            }
         }
     })
 
@@ -147,6 +149,16 @@ namespace pxtlora {
         return str;
     }
 
+    function waitForAuxHigh(timeoutMs: number): boolean {
+        let start = input.runningTime()
+        while (input.runningTime() - start < timeoutMs) {
+            if (pins.digitalReadPin(e32Pins.aux) == 1) {
+                return true
+            }
+            basic.pause(2)
+        }
+        return false
+    }
 
     // ==========================================================================
     // Export Functions.
@@ -176,7 +188,9 @@ namespace pxtlora {
     export function e32SendString(str: string) {
         if (e32Pins.config == false) {
             setNormalMode()
+            waitForAuxHigh(200)
             serial.writeLine(str)
+            waitForAuxHigh(500)
         }
     }
 
