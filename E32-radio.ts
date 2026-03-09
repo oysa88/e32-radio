@@ -229,7 +229,9 @@ namespace pxtlora {
     export function e32Init(m0: DigitalPin, m1: DigitalPin, aux: DigitalPin, tx: SerialPin, rx: SerialPin, baud: BaudRate, ConfigMode: boolean) {
 
         serial.redirect(rx, tx, baud)
-
+        serial.setRxBufferSize(254)
+        serial.setTxBufferSize(254)
+        
         e32Pins.m0 = m0;
         e32Pins.m1 = m1;
         e32Pins.aux = aux;
